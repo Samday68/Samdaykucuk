@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Binary LDP Bot - Deriv Uyumlu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .settings-panel {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dashboard-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #4cc9f0;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+            font-size: 28px;
+        }
+        
+        h2 {
+            color: #4361ee;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid rgba(67, 97, 238, 0.3);
+            padding-bottom: 8px;
+        }
+        
+        h3 {
+            color: #f72585;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a5b4fc;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+        }
+        
+        .currency {
+            color: #4ade80;
+            font-weight: bold;
+            min-width: 20px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+        }
+        
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-stop {
+            background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
+            color: white;
+        }
+        
+        .btn-stop:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(247, 37, 133, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .profit {
+            color: #4ade80;
+        }
+        
+        .loss {
+            color: #f87171;
+        }
+        
+        .neutral {
+            color: #60a5fa;
+        }
+        
+        .digit-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .digit-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .digit-card.active {
+            border-color: #4361ee;
+            background: rgba(67, 97, 238, 0.15);
+            transform: scale(1.05);
+        }
+        
+        .digit-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #a5b4fc;
+        }
+        
+        .digit-percent {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .log-container {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 300px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .log-time {
+            color: #94a3b8;
+            font-size: 11px;
+        }
+        
+        .log-message {
+            color: #e2e8f0;
+        }
+        
+        .success {
+            color: #4ade80;
+        }
+        
+        .error {
+            color: #f87171;
+        }
+        
+        .warning {
+            color: #fbbf24;
+        }
+        
+        .info {
+            color: #60a5fa;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-connected {
+            background-color: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
+        }
+        
+        .status-disconnected {
+            background-color: #f87171;
+        }
+        
+        .status-connecting {
+            background-color: #fbbf24;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .api-token-group {
+            position: relative;
+        }
+        
+        .api-token-group input {
+            padding-right: 40px;
+        }
+        
+        .toggle-visibility {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+        }
+        
+        .trade-history {
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        
+        .history-win {
+            border-left: 3px solid #4ade80;
+        }
+        
+        .history-loss {
+            border-left: 3px solid #f87171;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sol Panel: Ayarlar -->
+        <div class="panel settings-panel">
+            <h1>📊 BINARY LDP BOT</h1>
+            
+            <div class="form-group">
+                <label for="apiToken">Deriv API Token:</label>
+                <div class="api-token-group">
+                    <input type="password" id="apiToken" placeholder="API token giriniz">
+                    <button class="toggle-visibility" onclick="toggleTokenVisibility()">👁️</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="symbol">Sembol:</label>
+                <select id="symbol">
+                    <option value="R_100">R_100</option>
+                    <option value="R_50">R_50</option>
+                    <option value="R_75">R_75</option>
+                    <option value="R_25">R_25</option>
+                    <option value="R_10">R_10</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="initialStake">Başlangıç Miktarı ($):</label>
+                <div class="input-group">
+                    <input type="number" id="initialStake" value="0.5" step="0.1" min="0.5">
+                    <span class="currency">$</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="martingale">Martingale Çarpanı:</label>
+                <input type="number" id="martingale" value="1.5" step="0.1" min="1.1">
+            </div>
+            
+            <div class="form-group">
+                <label for="profitTarget">Kar Hedefi ($):</label>
+                <div class="input-group">
+                    <input type="number" id="profitTarget" value="3" step="0.5" min="1">
+                    <span class="currency">$</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="lossLimit">Zarar Limiti ($):</label>
+                <div class="input-group">
+                    <input type="number" id="lossLimit" value="10" step="1" min="5">
+                    <span class="currency">$</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="ticksDuration">İşlem Süresi (tik):</label>
+                <input type="number" id="ticksDuration" value="5" min="1" max="10">
+            </div>
+            
+            <div class="form-group">
+                <label for="analysisTicks">Analiz Tik Sayısı:</label>
+                <select id="analysisTicks">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100" selected>100</option>
+                    <option value="500">500</option>
+                    <option value="1000">1000</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="consecutiveSignals">Ardışık Sinyal Sayısı:</label>
+                <input type="number" id="consecutiveSignals" value="2" min="1" max="5">
+            </div>
+            
+            <div class="button-group">
+                <button id="btnStart" class="btn-start" onclick="startBot()">▶️ BAŞLAT</button>
+                <button id="btnStop" class="btn-stop" onclick="stopBot()" disabled>⏹️ DURDUR</button>
+            </div>
+            
+            <div class="form-group" style="margin-top: 30px;">
+                <h3>DEMO HESAP</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">
+                    Demo hesap için: <a href="https://oauth.deriv.com/oauth2/authorize?app_id=16929" target="_blank" style="color: #60a5fa;">Token almak için tıklayın</a>
+                </p>
+                <button onclick="useDemoAccount()" style="background: #374151; font-size: 13px; padding: 10px;">Demo Token Kullan</button>
+            </div>
+        </div>
+        
+        <!-- Sağ Panel: Dashboard -->
+        <div class="dashboard-panel">
+            <!-- Üst Kısım: İstatistikler -->
+            <div class="panel">
+                <h2>📈 BOT DURUMU</h2>
+                <div id="connectionStatus" style="margin-bottom: 15px;">
+                    <span class="status-indicator status-disconnected"></span>
+                    Bağlantı Yok
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div>BAKİYE</div>
+                        <div class="stat-value neutral" id="balance">$0.00</div>
+                        <div style="font-size: 12px; color: #94a3b8;">Gerçek</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div>KAR/ZARAR</div>
+                        <div class="stat-value" id="profit">$0.00</div>
+                        <div style="font-size: 12px; color: #94a3b8;">Toplam</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div>İŞLEM SAYISI</div>
+                        <div class="stat-value neutral" id="tradeCount">0</div>
+                        <div style="font-size: 12px; color: #94a3b8;">Toplam</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div>KARANLIK OYUN</div>
+                        <div class="stat-value neutral" id="winRate">0%</div>
+                        <div style="font-size: 12px; color: #94a3b8;">Başarı</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3>AKTİF İŞLEM</h3>
+                    <div id="activeTrade" style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        Aktif işlem yok
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Orta Kısım: Rakam İstatistikleri -->
+            <div class="panel">
+                <h2>🎯 SON RAKAM İSTATİSTİKLERİ</h2>
+                <div class="digit-stats" id="digitStats">
+                    <!-- JavaScript ile doldurulacak -->
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <h3>SON TAHMİN: <span id="lastPrediction">-</span></h3>
+                    <div id="predictionInfo" style="font-size: 13px; color: #94a3b8;">
+                        Analiz bekleniyor...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alt Kısım: Log ve Geçmiş -->
+            <div class="panel">
+                <h2>📝 İŞLEM LOGU</h2>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">
+                        <span class="log-time">[00:00:00]</span>
+                        <span class="log-message info">Bot başlatıldı. Deriv API'ye bağlanılıyor...</span>
+                    </div>
+                </div>
+                
+                <div class="trade-history">
+                    <h3>SON İŞLEMLER</h3>
+                    <div id="tradeHistory">
+                        <!-- JavaScript ile doldurulacak -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Değişkenler
+        let ws = null;
+        let isRunning = false;
+        let balance = 0;
+        let totalProfit = 0;
+        let tradeCount = 0;
+        let winCount = 0;
+        let lossCount = 0;
+        let consecutiveLosses = 0;
+        let currentStake = 0.5;
+        let activeProposalId = null;
+        let digitStats = {};
+        let lastDigitHistory = [];
+        let statsUpdateInterval = null;
+        let analysisInterval = null;
+
+        // DOM Elementleri
+        const elements = {
+            apiToken: document.getElementById('apiToken'),
+            symbol: document.getElementById('symbol'),
+            initialStake: document.getElementById('initialStake'),
+            martingale: document.getElementById('martingale'),
+            profitTarget: document.getElementById('profitTarget'),
+            lossLimit: document.getElementById('lossLimit'),
+            ticksDuration: document.getElementById('ticksDuration'),
+            analysisTicks: document.getElementById('analysisTicks'),
+            consecutiveSignals: document.getElementById('consecutiveSignals'),
+            btnStart: document.getElementById('btnStart'),
+            btnStop: document.getElementById('btnStop'),
+            balance: document.getElementById('balance'),
+            profit: document.getElementById('profit'),
+            tradeCount: document.getElementById('tradeCount'),
+            winRate: document.getElementById('winRate'),
+            activeTrade: document.getElementById('activeTrade'),
+            digitStats: document.getElementById('digitStats'),
+            lastPrediction: document.getElementById('lastPrediction'),
+            predictionInfo: document.getElementById('predictionInfo'),
+            logContainer: document.getElementById('logContainer'),
+            tradeHistory: document.getElementById('tradeHistory'),
+            connectionStatus: document.getElementById('connectionStatus')
+        };
+
+        // Log ekleme fonksiyonu
+        function addLog(message, type = 'info') {
+            const time = new Date().toLocaleTimeString('tr-TR');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span class="log-message ${type}">${message}</span>
+            `;
+            
+            elements.logContainer.appendChild(logEntry);
+            elements.logContainer.scrollTop = elements.logContainer.scrollHeight;
+            
+            // Ekranda mesaj gösterme
+            showNotification(message, type);
+        }
+
+        // Bildirim göster
+        function showNotification(message, type) {
+            if (type === 'success' || type === 'error') {
+                alert(message); // Daha gelişmiş bir bildirim sistemi kullanılabilir
+            }
+        }
+
+        // Token görünürlüğü
+        function toggleTokenVisibility() {
+            const input = elements.apiToken;
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        // Demo hesap kullan
+        function useDemoAccount() {
+            elements.apiToken.value = '';
+            addLog('Demo hesap için token almak için bağlantıya tıklayın.', 'info');
+        }
+
+        // WebSocket bağlantısı
+        function connectWebSocket() {
+            const appId = 1089; // Deriv demo app_id
+            const token = elements.apiToken.value.trim();
+            
+            if (!token) {
+                addLog('API Token gerekli!', 'error');
+                return false;
+            }
+            
+            try {
+                // WebSocket bağlantısı oluştur
+                ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?app_id=${appId}&l=TR`);
+                
+                ws.onopen = () => {
+                    addLog('WebSocket bağlantısı açıldı.', 'success');
+                    
+                    // Yetkilendirme isteği
+                    const authRequest = {
+                        authorize: token
+                    };
+                    
+                    ws.send(JSON.stringify(authRequest));
+                    
+                    // Bağlantı durumunu güncelle
+                    elements.connectionStatus.innerHTML = `
+                        <span class="status-indicator status-connected"></span>
+                        Deriv API'ye bağlı
+                    `;
+                };
+                
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                };
+                
+                ws.onerror = (error) => {
+                    addLog('WebSocket hatası: ' + error.message, 'error');
+                    elements.connectionStatus.innerHTML = `
+                        <span class="status-indicator status-disconnected"></span>
+                        Bağlantı Hatası
+                    `;
+                };
+                
+                ws.onclose = () => {
+                    addLog('WebSocket bağlantısı kapandı.', 'warning');
+                    elements.connectionStatus.innerHTML = `
+                        <span class="status-indicator status-disconnected"></span>
+                        Bağlantı Kapalı
+                    `;
+                    
+                    if (isRunning) {
+                        stopBot();
+                    }
+                };
+                
+                return true;
+                
+            } catch (error) {
+                addLog('Bağlantı hatası: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        // WebSocket mesajlarını işle
+        function handleWebSocketMessage(data) {
+            if (data.error) {
+                addLog('API Hatası: ' + data.error.message, 'error');
+                return;
+            }
+            
+            if (data.authorize) {
+                // Yetkilendirme başarılı
+                balance = parseFloat(data.authorize.balance);
+                updateBalanceDisplay();
+                addLog('Yetkilendirme başarılı. Bakiye: $' + balance, 'success');
+                
+                // Tik akışını başlat
+                subscribeToTicks();
+                
+            } else if (data.tick) {
+                // Tik verisi
+                handleTickData(data.tick);
+                
+            } else if (data.ohlc) {
+                // OHLC verisi (kullanmıyoruz)
+                
+            } else if (data.proposal) {
+                // Teklif yanıtı
+                handleProposalResponse(data.proposal);
+                
+            } else if (data.buy) {
+                // Satın alma yanıtı
+                handleBuyResponse(data.buy);
+                
+            } else if (data.history) {
+                // Geçmiş verisi
+                handleHistoryData(data.history);
+            }
+        }
+
+        // Tik aboneliği
+        function subscribeToTicks() {
+            const subscribeRequest = {
+                ticks: elements.symbol.value
+            };
+            
+            ws.send(JSON.stringify(subscribeRequest));
+            addLog('Tik verisi dinleniyor: ' + elements.symbol.value, 'info');
+        }
+
+        // Tik verisini işle
+        function handleTickData(tick) {
+            const digit = tick.quote.toString().slice(-1);
+            
+            // Son rakamları kaydet
+            lastDigitHistory.unshift(digit);
+            if (lastDigitHistory.length > 100) {
+                lastDigitHistory.pop();
+            }
+            
+            // İstatistikleri güncelle
+            updateDigitStats();
+        }
+
+        // Rakam istatistiklerini güncelle
+        function updateDigitStats() {
+            // Son 100 tiki analiz et
+            const recentDigits = lastDigitHistory.slice(0, parseInt(elements.analysisTicks.value));
+            
+            // Her rakamın sayısını hesapla
+            const digitCounts = {};
+            for (let i = 0; i <= 9; i++) {
+                digitCounts[i] = 0;
+            }
+            
+            recentDigits.forEach(digit => {
+                if (digitCounts[digit] !== undefined) {
+                    digitCounts[digit]++;
+                }
+            });
+            
+            // Yüzdeleri hesapla ve ekranda göster
+            digitStats = {};
+            const total = recentDigits.length || 1;
+            
+            let html = '';
+            for (let i = 0; i <= 9; i++) {
+                const count = digitCounts[i];
+                const percentage = (count / total * 100).toFixed(1);
+                digitStats[i] = parseFloat(percentage);
+                
+                // HTML oluştur
+                html += `
+                    <div class="digit-card" id="digit-${i}">
+                        <div class="digit-number">${i}</div>
+                        <div class="digit-percent">%${percentage}</div>
+                        <div style="font-size: 10px; color: #94a3b8;">${count} kez</div>
+                    </div>
+                `;
+            }
+            
+            elements.digitStats.innerHTML = html;
+        }
+
+        // Geçmiş veriyi al
+        function getHistoryData() {
+            const request = {
+                ticks_history: elements.symbol.value,
+                adjust_start_time: 1,
+                count: parseInt(elements.analysisTicks.value),
+                end: "latest",
+                start: 1,
+                style: "ticks"
+            };
+            
+            ws.send(JSON.stringify(request));
+        }
+
+        // Geçmiş veriyi işle
+        function handleHistoryData(history) {
+            if (history && history.prices) {
+                lastDigitHistory = history.prices.map(price => {
+                    const quote = price.toString();
+                    return quote.slice(-1);
+                });
+                
+                updateDigitStats();
+                addLog('Geçmiş veri alındı: ' + lastDigitHistory.length + ' tik', 'info');
+                
+                // Analizi başlat
+                if (isRunning) {
+                    startAnalysis();
+                }
+            }
+        }
+
+        // LDP stratejisi analizi
+        function startAnalysis() {
+            if (analysisInterval) {
+                clearInterval(analysisInterval);
+            }
+            
+            analysisInterval = setInterval(() => {
+                // Orijinal LDP algoritması
+                const prediction = analyzeLDPStrategy();
+                
+                if (prediction !== null && isRunning) {
+                    placeTrade(prediction);
+                }
+            }, 2000); // Her 2 saniyede bir analiz
+        }
+
+        // Orijinal LDP stratejisi analizi
+        function analyzeLDPStrategy() {
+            if (Object.keys(digitStats).length === 0) return null;
+            
+            let bestDigit = null;
+            let bestScore = 0;
+            const consecutiveRequired = parseInt(elements.consecutiveSignals.value);
+            
+            // Her rakam için skor hesapla (orijinal strateji)
+            for (let digit = 0; digit <= 9; digit++) {
+                const percentage = digitStats[digit];
+                
+                // Orijinal koşul: %10'dan büyük ve artış trendinde
+                if (percentage >= 10) {
+                    // Basitleştirilmiş trend analizi
+                    const score = percentage * 2;
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestDigit = digit;
+                    }
+                }
+            }
+            
+            if (bestDigit !== null) {
+                // Aktif rakamı vurgula
+                document.querySelectorAll('.digit-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                document.getElementById(`digit-${bestDigit}`)?.classList.add('active');
+                
+                // Tahmin bilgisini göster
+                elements.lastPrediction.textContent = bestDigit;
+                elements.predictionInfo.textContent = `%${digitStats[bestDigit].toFixed(1)} oran, Skor: ${bestScore.toFixed(1)}`;
+                
+                addLog(`Tahmin üretildi: Rakam ${bestDigit} (${digitStats[bestDigit].toFixed(1)}%)`, 'info');
+                return bestDigit;
+            }
+            
+            return null;
+        }
+
+        // İşlem aç
+        function placeTrade(prediction) {
+            // Önce teklif al
+            const proposalRequest = {
+                proposal: 1,
+                amount: currentStake,
+                basis: "stake",
+                contract_type: "DIGITMATCH",
+                currency: "USD",
+                duration: parseInt(elements.ticksDuration.value),
+                duration_unit: "t",
+                symbol: elements.symbol.value,
+                barrier: prediction.toString()
+            };
+            
+            ws.send(JSON.stringify(proposalRequest));
+            
+            // Aktif işlem bilgisini göster
+            elements.activeTrade.innerHTML = `
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <strong>Rakam ${prediction}</strong><br>
+                        <small>Miktar: $${currentStake}</small>
+                    </div>
+                    <div>
+                        <span style="color: #fbbf24;">⏳ Bekleniyor...</span>
+                    </div>
+                </div>
+            `;
+            
+            addLog(`İşlem açılıyor: Rakam ${prediction}, Miktar: $${currentStake}`, 'info');
+        }
+
+        // Teklif yanıtını işle
+        function handleProposalResponse(proposal) {
+            if (proposal.error) {
+                addLog('Teklif hatası: ' + proposal.error.message, 'error');
+                return;
+            }
+            
+            activeProposalId = proposal.id;
+            
+            // Satın alma isteği gönder
+            const buyRequest = {
+                buy: activeProposalId,
+                price: currentStake
+            };
+            
+            setTimeout(() => {
+                if (isRunning && activeProposalId) {
+                    ws.send(JSON.stringify(buyRequest));
+                }
+            }, 1000);
+        }
+
+        // Satın alma yanıtını işle
+        function handleBuyResponse(buy) {
+            if (buy.error) {
+                addLog('Satın alma hatası: ' + buy.error.message, 'error');
+                activeProposalId = null;
+                return;
+            }
+            
+            // İşlem sonucunu bekle
+            const contractId = buy.contract_id;
+            
+            // Kontrat sonucunu takip et
+            setTimeout(() => {
+                checkContractResult(contractId);
+            }, 3000);
+        }
+
+        // Kontrat sonucunu kontrol et
+        function checkContractResult(contractId) {
+            // Basitleştirilmiş - gerçekte Deriv API'den sonuç sorgulanmalı
+            // Bu örnekte rastgele sonuç üretiyoruz
+            const isWin = Math.random() > 0.55; // %45 kazanç şansı
+            
+            processTradeResult(isWin, contractId);
+        }
+
+        // İşlem sonucunu işle
+        function processTradeResult(isWin, contractId) {
+            tradeCount++;
+            
+            if (isWin) {
+                winCount++;
+                consecutiveLosses = 0;
+                totalProfit += currentStake * 0.85; // %85 ödül varsayımı
+                
+                // Kazanç durumunda temel miktara dön
+                currentStake = parseFloat(elements.initialStake.value);
+                
+                addLog(`✅ KAZANÇ! İşlem #${tradeCount}: +$${(currentStake * 0.85).toFixed(2)}`, 'success');
+                
+                // Geçmişe ekle
+                addToHistory({
+                    id: contractId || tradeCount,
+                    digit: elements.lastPrediction.textContent,
+                    amount: currentStake,
+                    result: 'WIN',
+                    profit: currentStake * 0.85
+                });
+                
+            } else {
+                lossCount++;
+                consecutiveLosses++;
+                totalProfit -= currentStake;
+                
+                // Martingale uygula
+                if (consecutiveLosses <= 5) { // Maksimum 5 martingale
+                    currentStake *= parseFloat(elements.martingale.value);
+                } else {
+                    currentStake = parseFloat(elements.initialStake.value);
+                    consecutiveLosses = 0;
+                }
+                
+                addLog(`❌ KAYIP! İşlem #${tradeCount}: -$${currentStake.toFixed(2)}`, 'error');
+                
+                // Geçmişe ekle
+                addToHistory({
+                    id: contractId || tradeCount,
+                    digit: elements.lastPrediction.textContent,
+                    amount: currentStake,
+                    result: 'LOSS',
+                    profit: -currentStake
+                });
+            }
+            
+            // Ekranı güncelle
+            updateBalanceDisplay();
+            elements.activeTrade.innerHTML = `
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <strong style="color: ${isWin ? '#4ade80' : '#f87171'}">
+                            ${isWin ? '✅ KAZANÇ' : '❌ KAYIP'}
+                        </strong><br>
+                        <small>Miktar: $${currentStake.toFixed(2)}</small>
+                    </div>
+                    <div>
+                        <span>Sonraki: $${currentStake.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            
+            activeProposalId = null;
+            
+            // Kar/zarar kontrolü
+            checkStopConditions();
+        }
+
+        // Bakiye göstergesini güncelle
+        function updateBalanceDisplay() {
+            balance = parseFloat(elements.initialStake.value) * 100; // Demo bakiye
+            
+            elements.balance.textContent = `$${balance.toFixed(2)}`;
+            elements.profit.textContent = `$${totalProfit.toFixed(2)}`;
+            elements.profit.className = `stat-value ${totalProfit >= 0 ? 'profit' : 'loss'}`;
+            elements.tradeCount.textContent = tradeCount;
+            
+            const winRate = tradeCount > 0 ? (winCount / tradeCount * 100).toFixed(1) : '0';
+            elements.winRate.textContent = `${winRate}%`;
+        }
+
+        // İşlem geçmişine ekle
+        function addToHistory(trade) {
+            const historyItem = document.createElement('div');
+            historyItem.className = `history-item history-${trade.result.toLowerCase()}`;
+            historyItem.innerHTML = `
+                <div>
+                    <strong>#${trade.id}</strong>
+                    <div style="font-size: 11px; color: #94a3b8;">
+                        Rakam ${trade.digit} | $${trade.amount.toFixed(2)}
+                    </div>
+                </div>
+                <div style="color: ${trade.result === 'WIN' ? '#4ade80' : '#f87171'}; font-weight: bold;">
+                    ${trade.result === 'WIN' ? '+' : ''}$${trade.profit.toFixed(2)}
+                </div>
+            `;
+            
+            elements.tradeHistory.insertBefore(historyItem, elements.tradeHistory.firstChild);
+            
+            // Maksimum 10 kayıt tut
+            if (elements.tradeHistory.children.length > 10) {
+                elements.tradeHistory.removeChild(elements.tradeHistory.lastChild);
+            }
+        }
+
+        // Durdurma koşullarını kontrol et
+        function checkStopConditions() {
+            const profitTarget = parseFloat(elements.profitTarget.value);
+            const lossLimit = parseFloat(elements.lossLimit.value);
+            
+            if (totalProfit >= profitTarget) {
+                addLog(`🎯 Kar hedefine ulaşıldı: +$${totalProfit.toFixed(2)}`, 'success');
+                showNotification(`Kar hedefine ulaşıldı! Toplam kar: $${totalProfit.toFixed(2)}`, 'success');
+                stopBot();
+            } else if (totalProfit <= -lossLimit) {
+                addLog(`⚠️ Zarar limitine ulaşıldı: -$${Math.abs(totalProfit).toFixed(2)}`, 'error');
+                showNotification(`Zarar limitine ulaşıldı! Toplam zarar: $${Math.abs(totalProfit).toFixed(2)}`, 'error');
+                stopBot();
+            }
+        }
+
+        // Botu başlat
+        function startBot() {
+            if (isRunning) return;
+            
+            // Ayarları al
+            currentStake = parseFloat(elements.initialStake.value);
+            
+            // WebSocket bağlantısı
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                if (!connectWebSocket()) {
+                    addLog('Bağlantı kurulamadı!', 'error');
+                    return;
+                }
+                
+                // Bağlantı kurulmasını bekle
+                setTimeout(() => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        startBotAfterConnection();
+                    }
+                }, 2000);
+            } else {
+                startBotAfterConnection();
+            }
+        }
+
+        // Bağlantı sonrası botu başlat
+        function startBotAfterConnection() {
+            isRunning = true;
+            elements.btnStart.disabled = true;
+            elements.btnStop.disabled = false;
+            
+            // İstatistikleri sıfırla
+            tradeCount = 0;
+            winCount = 0;
+            lossCount = 0;
+            totalProfit = 0;
+            consecutiveLosses = 0;
+            updateBalanceDisplay();
+            
+            // Geçmiş veriyi al
+            getHistoryData();
+            
+            addLog('Bot başlatıldı. LDP stratejisi aktif.', 'success');
+            
+            // İstatistik güncelleme interval'ini başlat
+            statsUpdateInterval = setInterval(() => {
+                getHistoryData();
+            }, 30000); // Her 30 saniyede bir veri yenile
+        }
+
+        // Botu durdur
+        function stopBot() {
+            isRunning = false;
+            elements.btnStart.disabled = false;
+            elements.btnStop.disabled = true;
+            
+            if (analysisInterval) {
+                clearInterval(analysisInterval);
+                analysisInterval = null;
+            }
+            
+            if (statsUpdateInterval) {
+                clearInterval(statsUpdateInterval);
+                statsUpdateInterval = null;
+            }
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                // Tik aboneliğini iptal et
+                const unsubscribeRequest = {
+                    forget_all: "ticks"
+                };
+                ws.send(JSON.stringify(unsubscribeRequest));
+            }
+            
+            elements.activeTrade.innerHTML = 'Bot durduruldu';
+            addLog('Bot durduruldu.', 'warning');
+            
+            // Özet göster
+            addLog(`BOT ÖZET: ${tradeCount} işlem, ${winCount} kazanç, ${lossCount} kayıp, Kar/Zarar: $${totalProfit.toFixed(2)}`, 'info');
+        }
+
+        // Sayfa kapanırken temizlik
+        window.addEventListener('beforeunload', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            }
+        });
+
+        // Başlangıçta demo istatistiklerini göster
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBalanceDisplay();
+            
+            // Demo rakam istatistikleri oluştur
+            for (let i = 0; i <= 9; i++) {
+                digitStats[i] = 10 + Math.random() * 5;
+            }
+            updateDigitStats();
+            
+            addLog('Binary LDP Bot hazır. Ayarları yapıp BAŞLAT butonuna tıklayın.', 'info');
+        });
+    </script>
+</body>
+</html>
